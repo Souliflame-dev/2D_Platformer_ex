@@ -8,16 +8,24 @@ public class PlayerMove : MonoBehaviour
     public float stopSpeed;
     public float jumpPower;
     public GameManager gameManager;
+    public AudioClip audioJump;
+    public AudioClip audioAttack;
+    public AudioClip audioDamaged;
+    public AudioClip audioItem;
+    public AudioClip audioDie;
+    public AudioClip audioFinish;
 
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator animator;
+    AudioSource audioSource;
 
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -27,6 +35,7 @@ public class PlayerMove : MonoBehaviour
         {
             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
             animator.SetBool("isJumping", true);
+            PlaySound("JUMP");
         }
 
         //Stop Speed
@@ -77,7 +86,7 @@ public class PlayerMove : MonoBehaviour
 
             if (rayHit.collider != null)
             {
-                if (rayHit.distance < 0.51f)
+                if (rayHit.distance < 0.5f)
                 {
                     Debug.Log("isJumping");
                     animator.SetBool("isJumping", false);
@@ -94,6 +103,7 @@ public class PlayerMove : MonoBehaviour
             if (collision.gameObject.tag == "Enemy" && (transform.position.y > collision.gameObject.transform.position.y) && rigid.velocity.y <= 0)
             {
                 OnAttack(collision.transform);
+                PlaySound("ATTACK");
             }
             else
             {
@@ -125,11 +135,17 @@ public class PlayerMove : MonoBehaviour
 
             //Disable Coin
             collision.gameObject.SetActive(false);
+
+            //Sound
+            PlaySound("ITEM");
         }
         else if (collision.gameObject.tag == "Finish")
         {
             //Next Stage
             gameManager.NextStage();
+
+            //Sound
+            PlaySound("FINISH");
         }
     }
 
@@ -139,7 +155,7 @@ public class PlayerMove : MonoBehaviour
         gameManager.stagePoint += 100;
 
         //Reaction Force
-        rigid.AddForce(Vector2.up * 3, ForceMode2D.Impulse);
+        rigid.AddForce(Vector2.up * 7, ForceMode2D.Impulse);
 
         //Enemy Die
         EnemyMove enemyMove = enemy.GetComponent<EnemyMove>();
@@ -189,5 +205,38 @@ public class PlayerMove : MonoBehaviour
         //Die Effect Jump
         rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
 
+        //Sound
+        PlaySound("DIE");
+    }
+
+    public void SetVelocityZero()
+    {
+        rigid.velocity = Vector2.zero;
+    }
+
+    public void PlaySound(string action)
+    {
+        switch (action)
+        {
+            case "JUMP":
+                audioSource.clip = audioJump;
+                break;
+            case "ATTACK":
+                audioSource.clip = audioAttack;
+                break;
+            case "DAMAGED":
+                audioSource.clip = audioDamaged;
+                break;
+            case "ITEM":
+                audioSource.clip = audioItem;
+                break;
+            case "DIE":
+                audioSource.clip = audioDie;
+                break;
+            case "FINISH":
+                audioSource.clip = audioFinish;
+                break;
+        }
+        audioSource.Play();
     }
 }

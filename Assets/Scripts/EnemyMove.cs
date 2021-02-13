@@ -18,7 +18,7 @@ public class EnemyMove : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
 
-        Invoke("Think", 5);
+        Invoke("Think", 1.0f);
     }
 
     void FixedUpdate()
